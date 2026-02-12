@@ -1,4 +1,3 @@
-
 export enum AIModel {
   CLAUDE_3_5 = 'claude-3-5-sonnet',
   GPT_4O = 'gpt-4o',
@@ -33,5 +32,6 @@ declare global {
   interface Window {
     puter: any;
     JSZip: any;
+    process: any;
   }
 }
