@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import Editor from '@monaco-editor/react';
 import { Preview } from './components/Preview';
@@ -8,12 +9,14 @@ import {
   MessageSquare, 
   Download, 
   Settings, 
-  Terminal, 
   Zap, 
-  Layout, 
   FolderTree,
   Send,
-  Cpu
+  Cpu,
+  BrainCircuit,
+  Terminal,
+  Layers,
+  Sparkles
 } from 'lucide-react';
 
 const { useState, useEffect, useRef, useMemo, useCallback } = React;
@@ -29,13 +32,52 @@ const INITIAL_FILES: FileEntry[] = [
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { background: #05070a; color: #f8fafc; font-family: system-ui, sans-serif; height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
-    .vayu-card { padding: 4rem; border-radius: 2rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px); text-align: center; }
-    h1 { font-size: 4rem; font-weight: 900; background: linear-gradient(to right, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
+    body { 
+      background: radial-gradient(circle at top right, #0a0e14, #05070a); 
+      color: #f8fafc; 
+      font-family: 'Inter', sans-serif; 
+      height: 100vh; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      margin: 0; 
+      overflow: hidden;
+    }
+    .hero-container {
+      text-align: center;
+      animation: fadeIn 1s ease-out;
+    }
+    h1 {
+      font-size: 5rem;
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      background: linear-gradient(to bottom right, #fff, #64748b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 0;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #60a5fa;
+      margin-bottom: 2rem;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 <body>
-  <div class="vayu-card"><h1>VAYU CODE</h1><p style="color: #64748b; margin-top: 1rem;">Neural IDE Workspace Ready</p></div>
+  <div class="hero-container">
+    <div class="status-badge"><div class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div> SYSTEM READY</div>
+    <h1>VAYU CODE</h1>
+    <p style="color: #64748b; font-size: 1.125rem; margin-top: 1rem; font-weight: 400;">Describe your vision to begin synthesis.</p>
+  </div>
 </body>
 </html>`
   }
@@ -61,6 +103,7 @@ const App: React.FC = () => {
     if (activeFile.path.endsWith('.py')) return activeFile.content;
     const htmlFile = files.find(f => f.path === 'index.html');
     let content = htmlFile ? htmlFile.content : `<!DOCTYPE html><html><head><script src="https://cdn.tailwindcss.com"></script></head><body><div id="root"></div></body></html>`;
+    
     const styles = files.filter(f => f.path.endsWith('.css')).map(f => `<style data-path="${f.path}">${f.content}</style>`).join('\n');
     const scripts = files.filter(f => f.path.endsWith('.js') || f.path.endsWith('.ts') || f.path.endsWith('.tsx')).map(f => {
       const isReactOrTS = f.path.endsWith('.ts') || f.path.endsWith('.tsx');
@@ -146,21 +189,28 @@ const App: React.FC = () => {
     setMessages(prev => [...prev, assistantMsg]);
 
     try {
-      const systemInstruction = `You are Vayu Architect, a professional IDE core.
-      USER INTENT ANALYSIS: 
-      - If user asks for a website: Use HTML/Tailwind/React/Three.js.
-      - If user asks for logic/data: Use Python.
-      - NEVER include unnecessary frameworks.
+      const systemInstruction = `You are VAYU ARCHITECT, an elite neural IDE engine.
       
-      OUTPUT PROTOCOL:
-      You must respond with conversational text followed by code blocks using this EXACT format:
+      PHASE 1: ANALYSIS
+      Analyze the user's request to determine the optimal stack.
+      - If it's a data-heavy or algorithmic task: Use Python.
+      - If it's a visual or interactive app: Use React (TSX), Tailwind CSS, and Lucide Icons.
+      - If it's highly creative: Incorporate Three.js.
+      - DO NOT bundle multiple frameworks unless essential. Keep it lean.
+
+      PHASE 2: OUTPUT PROTOCOL
+      First, output a concise architectural summary (2-3 sentences) explaining the chosen stack and approach.
+      Then, provide the file implementation using this strict format:
+      
       [FILE: path/to/file.ext]
       \`\`\`language
-      CODE_CONTENT
+      CONTENT
       \`\`\`
+
+      Current Workspace:
+      ${files.map(f => `- ${f.path}`).join('\n')}
       
-      Current Workspace Context:
-      ${files.map(f => `[FILE: ${f.path}]\n\`\`\`${f.language}\n${f.content}\n\`\`\``).join('\n')}`;
+      User Intent: ${userMsg.content}`;
 
       let fullContent = '';
 
@@ -168,26 +218,27 @@ const App: React.FC = () => {
         const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
         const result = await ai.models.generateContentStream({
           model: activeModel,
-          contents: [{ role: 'user', parts: [{ text: `${systemInstruction}\n\nUser Request: ${userMsg.content}` }] }]
+          contents: [{ role: 'user', parts: [{ text: systemInstruction }] }]
         });
         
         for await (const chunk of result) {
           const text = chunk.text;
           if (text) {
             fullContent += text;
-            setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, content: fullContent, status: 'coding' } : m));
+            setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, content: fullContent, status: fullContent.includes('[FILE:') ? 'coding' : 'analyzing' } : m));
             parseAndApplyFiles(fullContent);
+            if (fullContent.includes('[FILE:')) setCurrentStatus('coding');
           }
         }
       } else {
-        // Use Puter for Claude and GPT-4o
-        const response = await window.puter.ai.chat(`${systemInstruction}\n\nUser: ${userMsg.content}`, { model: activeModel, stream: true });
+        const response = await window.puter.ai.chat(systemInstruction, { model: activeModel, stream: true });
         for await (const chunk of response) {
           const text = typeof chunk === 'string' ? chunk : (chunk.text || chunk.message?.content || "");
           if (text) {
             fullContent += text;
-            setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, content: fullContent, status: 'coding' } : m));
+            setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, content: fullContent, status: fullContent.includes('[FILE:') ? 'coding' : 'analyzing' } : m));
             parseAndApplyFiles(fullContent);
+            if (fullContent.includes('[FILE:')) setCurrentStatus('coding');
           }
         }
       }
@@ -195,7 +246,7 @@ const App: React.FC = () => {
       setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, isStreaming: false, status: 'idle' } : m));
     } catch (err: any) {
       console.error(err);
-      setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, content: `Error: ${err.message}`, isStreaming: false } : m));
+      setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, content: `Synthesis Error: ${err.message}`, isStreaming: false, error: err.message } : m));
     } finally {
       setIsGenerating(false);
       setCurrentStatus('idle');
@@ -211,35 +262,43 @@ const App: React.FC = () => {
     <div className="flex h-screen w-full bg-[#05070a] text-slate-200 overflow-hidden font-inter selection:bg-blue-500/30">
       {/* Activity Bar */}
       <div className="w-16 flex flex-col items-center py-6 bg-[#080b10] border-r border-white/5 gap-8 z-50">
-        <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center font-black text-white shadow-lg shadow-blue-500/20">V</div>
+        <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center font-black text-white shadow-lg shadow-blue-500/20 cursor-default">V</div>
         <div className="flex flex-col gap-6">
-          <button onClick={() => setActiveSidebarTab('chat')} className={`p-2.5 rounded-xl transition-all ${activeSidebarTab === 'chat' ? 'text-blue-400 bg-blue-500/10' : 'text-slate-600 hover:text-slate-400'}`}>
+          <button 
+            onClick={() => setActiveSidebarTab('chat')} 
+            className={`p-2.5 rounded-xl transition-all relative ${activeSidebarTab === 'chat' ? 'text-blue-400 bg-blue-500/10' : 'text-slate-600 hover:text-slate-400'}`}
+          >
             <MessageSquare size={20} />
+            {activeSidebarTab === 'chat' && <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-blue-500 rounded-l-full" />}
           </button>
-          <button onClick={() => setActiveSidebarTab('files')} className={`p-2.5 rounded-xl transition-all ${activeSidebarTab === 'files' ? 'text-blue-400 bg-blue-500/10' : 'text-slate-600 hover:text-slate-400'}`}>
+          <button 
+            onClick={() => setActiveSidebarTab('files')} 
+            className={`p-2.5 rounded-xl transition-all relative ${activeSidebarTab === 'files' ? 'text-blue-400 bg-blue-500/10' : 'text-slate-600 hover:text-slate-400'}`}
+          >
             <FolderTree size={20} />
-          </button>
-          <div className="h-px w-6 bg-white/5 mx-auto" />
-          <button onClick={handleDownload} className="p-2.5 rounded-xl text-slate-600 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all">
-            <Download size={20} />
+            {activeSidebarTab === 'files' && <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-blue-500 rounded-l-full" />}
           </button>
         </div>
         <div className="mt-auto flex flex-col gap-6 pb-4">
+          <button onClick={handleDownload} className="p-2.5 rounded-xl text-slate-600 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all">
+            <Download size={20} />
+          </button>
           <Settings size={20} className="text-slate-600 hover:text-slate-400 cursor-pointer" />
         </div>
       </div>
 
       {/* Sidebar Panel */}
-      <div className="w-[380px] flex flex-col bg-[#0b0e14] border-r border-white/5 overflow-hidden">
-        <div className="h-16 px-6 border-b border-white/5 flex items-center justify-between">
-          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">
+      <div className="w-[400px] flex flex-col bg-[#0b0e14] border-r border-white/5 overflow-hidden">
+        <div className="h-16 px-6 border-b border-white/5 flex items-center justify-between bg-[#0b0e14]/50 backdrop-blur-md">
+          <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500 flex items-center gap-2">
+            {activeSidebarTab === 'chat' ? <BrainCircuit size={12} className="text-blue-500" /> : <Layers size={12} className="text-indigo-500" />}
             {activeSidebarTab === 'chat' ? 'Neural Link' : 'Workspace'}
           </span>
           {activeSidebarTab === 'chat' && (
             <select 
               value={activeModel} 
               onChange={(e) => setActiveModel(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[10px] text-blue-400 outline-none hover:bg-white/10 transition-all cursor-pointer font-bold"
+              className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[10px] text-blue-400 outline-none hover:bg-white/10 transition-all cursor-pointer font-bold appearance-none text-center min-w-[100px]"
             >
               <option value={AIModel.GEMINI_FLASH}>Gemini 2.0</option>
               <option value={AIModel.GEMINI_PRO}>Gemini 3 Pro</option>
@@ -254,44 +313,57 @@ const App: React.FC = () => {
             <>
               <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar pb-40">
                 {messages.length === 0 && (
-                  <div className="h-full flex flex-col items-center justify-center text-center opacity-30 px-10">
-                    <Cpu size={48} className="text-blue-500 mb-6" />
-                    <p className="text-xs font-medium leading-relaxed">System ready for architectural synthesis. Describe your application to begin.</p>
+                  <div className="h-full flex flex-col items-center justify-center text-center px-10">
+                    <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mb-6">
+                      <Sparkles size={32} className="text-blue-500" />
+                    </div>
+                    <h3 className="text-sm font-bold text-slate-300 mb-2">Neural Workspace Ready</h3>
+                    <p className="text-xs text-slate-500 leading-relaxed font-medium">Define your vision. The architect will select the optimal stack and begin synthesis.</p>
                   </div>
                 )}
                 {messages.map(msg => (
-                  <div key={msg.id} className={`flex flex-col gap-2 ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                    <div className={`max-w-[90%] p-5 rounded-2xl text-[13px] border transition-all ${
-                      msg.role === 'user' ? 'bg-blue-600 text-white border-blue-400' : 'bg-white/[0.03] text-slate-200 border-white/10'
+                  <div key={msg.id} className={`flex flex-col gap-2 ${msg.role === 'user' ? 'items-end' : 'items-start animate-in fade-in slide-in-from-bottom-2 duration-300'}`}>
+                    <div className={`max-w-[92%] p-5 rounded-2xl text-[13px] border transition-all ${
+                      msg.role === 'user' ? 'bg-blue-600 text-white border-blue-400/50 shadow-lg shadow-blue-500/10' : 'bg-white/[0.03] text-slate-200 border-white/5'
                     }`}>
-                      <div className="whitespace-pre-wrap leading-relaxed">
+                      <div className="whitespace-pre-wrap leading-relaxed font-medium">
                         {msg.role === 'user' ? msg.content : cleanDisplayContent(msg.content)}
+                        {msg.isStreaming && !cleanDisplayContent(msg.content) && (
+                          <div className="flex gap-1 items-center">
+                            <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce" />
+                            <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce delay-75" />
+                            <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce delay-150" />
+                          </div>
+                        )}
                       </div>
                     </div>
+                    {msg.role === 'assistant' && msg.model && (
+                      <span className="text-[9px] font-black uppercase text-slate-600 ml-2 tracking-widest">{msg.model}</span>
+                    )}
                   </div>
                 ))}
                 <div ref={chatEndRef} />
               </div>
               
               {/* Input Area */}
-              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#0b0e14] via-[#0b0e14] to-transparent">
-                <div className="bg-[#1a1f29] border border-white/10 rounded-2xl p-4 shadow-2xl">
+              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#0b0e14] via-[#0b0e14] to-transparent z-10">
+                <div className="bg-[#1a1f29] border border-white/10 rounded-2xl p-4 shadow-2xl focus-within:border-blue-500/50 transition-all">
                   <textarea 
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     onKeyDown={(e) => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } }}
-                    placeholder="Describe your app..."
-                    className="w-full bg-transparent outline-none resize-none text-[13px] min-h-[40px] max-h-[120px] placeholder:text-slate-600"
+                    placeholder="E.g., Build a real-time weather dashboard with glassmorphism..."
+                    className="w-full bg-transparent outline-none resize-none text-[13px] min-h-[40px] max-h-[120px] placeholder:text-slate-600 font-medium"
                   />
                   <div className="flex justify-between items-center mt-3 pt-3 border-t border-white/5">
-                    <div className="flex items-center gap-2 text-[10px] text-slate-500 font-bold uppercase tracking-widest">
-                      <div className={`w-2 h-2 rounded-full ${isGenerating ? 'bg-blue-500 animate-pulse' : 'bg-slate-700'}`} />
+                    <div className="flex items-center gap-2 text-[9px] text-slate-500 font-black uppercase tracking-[0.2em]">
+                      <div className={`w-2 h-2 rounded-full ${isGenerating ? 'bg-blue-500 animate-pulse' : 'bg-slate-800'}`} />
                       {currentStatus}
                     </div>
                     <button 
                       onClick={handleSendMessage}
                       disabled={isGenerating || !prompt.trim()}
-                      className="p-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-20 rounded-xl transition-all text-white"
+                      className="p-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-20 rounded-xl transition-all text-white shadow-lg shadow-blue-500/20"
                     >
                       <Send size={16} />
                     </button>
@@ -300,7 +372,7 @@ const App: React.FC = () => {
               </div>
             </>
           ) : (
-            <div className="p-4 space-y-2">
+            <div className="p-4 space-y-1">
               {files.map(file => (
                 <button 
                   key={file.path}
@@ -309,8 +381,8 @@ const App: React.FC = () => {
                     activeFilePath === file.path ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' : 'border-transparent text-slate-500 hover:bg-white/5'
                   }`}
                 >
-                  <Code2 size={14} />
-                  <span className="flex-1 text-left truncate font-medium">{file.path}</span>
+                  <Code2 size={14} className={activeFilePath === file.path ? 'text-blue-400' : 'text-slate-600'} />
+                  <span className="flex-1 text-left truncate font-semibold tracking-tight">{file.path}</span>
                 </button>
               ))}
             </div>
@@ -322,16 +394,22 @@ const App: React.FC = () => {
       <div className="flex-1 flex flex-col min-w-0 bg-[#05070a]">
         <div className="h-16 px-8 flex items-center justify-between bg-[#0b0e14] border-b border-white/5">
           <div className="flex items-center gap-4">
-            <span className="text-[11px] font-black text-blue-500 uppercase tracking-[0.4em]">{activeFile.path}</span>
+            <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-lg border border-white/10">
+              <span className="text-[10px] font-black text-blue-500 uppercase tracking-[0.3em]">{activeFile.language}</span>
+            </div>
+            <span className="text-[12px] font-bold text-slate-400 tracking-tight">{activeFile.path}</span>
           </div>
-          <div className="flex items-center gap-4">
-            <Zap size={14} className="text-blue-500 animate-pulse" />
+          <div className="flex items-center gap-6">
+             <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">
+               <Terminal size={14} className="text-slate-600" />
+               VAYU_RUNTIME_V2
+             </div>
           </div>
         </div>
 
         <div className="flex-1 flex overflow-hidden">
           {/* Editor Container */}
-          <div className="flex-1 border-r border-white/5 relative">
+          <div className="flex-1 border-r border-white/5 relative bg-[#0b0e14]">
             <Editor 
               height="100%"
               path={activeFile.path}
@@ -342,19 +420,26 @@ const App: React.FC = () => {
                 minimap: { enabled: false },
                 fontSize: 14,
                 fontFamily: "'Fira Code', monospace",
-                padding: { top: 20 },
                 automaticLayout: true,
                 readOnly: isGenerating && streamingFile === activeFile.path,
                 lineNumbers: 'on',
-                glyphMargin: false,
-                folding: true,
-                lineDecorationsWidth: 10,
-                lineNumbersMinChars: 3
+                renderLineHighlight: 'all',
+                scrollBeyondLastLine: false,
+                cursorSmoothCaretAnimation: 'on',
+                smoothScrolling: true,
+                // Consistently set editor padding in a single property
+                padding: { top: 24, bottom: 24 }
               }}
               onChange={(val) => {
                 if (!isGenerating) setFiles(prev => prev.map(f => f.path === activeFile.path ? { ...f, content: val || '' } : f));
               }}
             />
+            {isGenerating && streamingFile === activeFile.path && (
+              <div className="absolute top-4 right-8 z-10 flex items-center gap-2 text-[10px] font-bold text-blue-500 bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 rounded-full backdrop-blur-md animate-pulse">
+                <Zap size={10} className="fill-current" />
+                STREAMING_CODE...
+              </div>
+            )}
           </div>
 
           {/* Preview Container */}
