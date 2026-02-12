@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import Editor from '@monaco-editor/react';
-import { Preview } from './components/Preview';
-import { AIModel, ChatMessage, FileEntry } from './types';
+import { Preview } from './components/Preview.tsx';
+import { AIModel, ChatMessage, FileEntry } from './types.ts';
 
 const INITIAL_FILES: FileEntry[] = [
   {
@@ -144,7 +144,7 @@ const App: React.FC = () => {
       link.href = url;
       link.download = `vayu-neural-pkg-${Date.now()}.zip`;
       link.click();
-      URL.revokeObjectURL(url);
+      URL.revokeObjectURL(zip);
     } catch (err) { console.error("Export failed:", err); }
   };
 
