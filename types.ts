@@ -1,7 +1,8 @@
 export enum AIModel {
   CLAUDE_3_5 = 'claude-3-5-sonnet',
   GPT_4O = 'gpt-4o',
-  GEMINI_FLASH = 'gemini-2.0-flash',
+  GEMINI_FLASH = 'gemini-3-flash-preview',
+  GEMINI_PRO = 'gemini-3-pro-preview',
 }
 
 export interface AIConfig {
