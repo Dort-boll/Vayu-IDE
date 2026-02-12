@@ -1,3 +1,4 @@
+
 {
   "name": "vayu-code-ide",
   "private": true,
@@ -13,7 +14,7 @@
     "react-dom": "^19.0.0",
     "@monaco-editor/react": "^4.6.0",
     "three": "^0.170.0",
-    "@google/genai": "^0.21.0",
+    "@google/genai": "latest",
     "lucide-react": "^0.468.0"
   },
   "devDependencies": {

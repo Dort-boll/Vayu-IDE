@@ -191,16 +191,16 @@ const App: React.FC = () => {
     try {
       const systemInstruction = `You are VAYU ARCHITECT, an elite neural IDE engine.
       
-      PHASE 1: ANALYSIS
-      Analyze the user's request to determine the optimal stack.
-      - If it's a data-heavy or algorithmic task: Use Python.
-      - If it's a visual or interactive app: Use React (TSX), Tailwind CSS, and Lucide Icons.
-      - If it's highly creative: Incorporate Three.js.
-      - DO NOT bundle multiple frameworks unless essential. Keep it lean.
+      PHASE 1: ARCHITECTURAL ANALYSIS
+      Based on the user's request, you must first determine the optimal technology stack:
+      - For logic, algorithms, or data processing: Use Python (.py).
+      - For interactive UIs, dashboards, or web apps: Use React (TSX), Tailwind CSS, and Lucide Icons.
+      - For 3D or high-performance graphics: Use Three.js.
+      - DO NOT combine frameworks unnecessarily. Keep it efficient and targeted.
 
-      PHASE 2: OUTPUT PROTOCOL
-      First, output a concise architectural summary (2-3 sentences) explaining the chosen stack and approach.
-      Then, provide the file implementation using this strict format:
+      PHASE 2: SYNTHESIS PROTOCOL
+      First, state your architectural choices (e.g., "I will build this using React and Tailwind for a modern glassmorphic UI").
+      Then, output the files in this EXACT format:
       
       [FILE: path/to/file.ext]
       \`\`\`language
@@ -210,7 +210,7 @@ const App: React.FC = () => {
       Current Workspace:
       ${files.map(f => `- ${f.path}`).join('\n')}
       
-      User Intent: ${userMsg.content}`;
+      User Request: ${userMsg.content}`;
 
       let fullContent = '';
 
@@ -318,7 +318,7 @@ const App: React.FC = () => {
                       <Sparkles size={32} className="text-blue-500" />
                     </div>
                     <h3 className="text-sm font-bold text-slate-300 mb-2">Neural Workspace Ready</h3>
-                    <p className="text-xs text-slate-500 leading-relaxed font-medium">Define your vision. The architect will select the optimal stack and begin synthesis.</p>
+                    <p className="text-xs text-slate-500 leading-relaxed font-medium">Describe your vision. The architect will determine the optimal stack and begin code synthesis.</p>
                   </div>
                 )}
                 {messages.map(msg => (
@@ -352,7 +352,7 @@ const App: React.FC = () => {
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     onKeyDown={(e) => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } }}
-                    placeholder="E.g., Build a real-time weather dashboard with glassmorphism..."
+                    placeholder="E.g., Build a real-time visualization of stock data..."
                     className="w-full bg-transparent outline-none resize-none text-[13px] min-h-[40px] max-h-[120px] placeholder:text-slate-600 font-medium"
                   />
                   <div className="flex justify-between items-center mt-3 pt-3 border-t border-white/5">
@@ -427,7 +427,6 @@ const App: React.FC = () => {
                 scrollBeyondLastLine: false,
                 cursorSmoothCaretAnimation: 'on',
                 smoothScrolling: true,
-                // Consistently set editor padding in a single property
                 padding: { top: 24, bottom: 24 }
               }}
               onChange={(val) => {
