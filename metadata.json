@@ -1,0 +1,8 @@
+{
+  "name": "Vayu Code IDE",
+  "description": "A cloud-native browser IDE for design software development with glassmorphism UI, powered by Puter.js and multi-model AI integration.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
