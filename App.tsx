@@ -8,7 +8,7 @@ import {
   Download, 
   Zap, 
   FolderTree,
-  Send,
+  Send, 
   BrainCircuit,
   Terminal,
   Layers,
@@ -161,7 +161,6 @@ const App: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Neural Bundler: Combines project files into a single previewable stream
   useEffect(() => {
     if (activeFile.path.endsWith('.py')) {
       setDebouncedBundledCode(activeFile.content);
@@ -222,18 +221,19 @@ const App: React.FC = () => {
       const workspaceContext = files.map(f => `[FILE: ${f.path}]\n${f.content}`).join('\n\n');
       const diagContext = forceDiagnostic && lastDiagnostic ? `RUNTIME_FAULTS:\n${lastDiagnostic.error}\nTRACE:\n${lastDiagnostic.logs.join('\n')}` : '';
 
-      const systemPrompt = `You are VAYU_NEURAL_IDE. An expert browser-software architect.
+      const systemPrompt = `You are VAYU_NEURAL_IDE, a world-class browser-software architect.
       
-      CONTEXT:
+      WORKSPACE_CONTEXT:
       ${workspaceContext}
       ${diagContext}
 
-      GOAL: Synthesize high-quality, professional code based on user commands.
+      OBJECTIVE:
+      Synthesize high-fidelity, professional code.
       
-      SYNTHESIS RULES:
-      1. To update or create files, output: [FILE: path] followed by a code block.
-      2. If modifying a file, output its ENTIRE new content.
-      3. Use top-tier design: Tailwind CSS, Glassmorphism, smooth animations.
+      SYNTHESIS_PROTOCOLS:
+      1. Prefix file changes with [FILE: path] followed by a fenced code block.
+      2. Always output the COMPLETE content for modified or new files.
+      3. Use modern Tailwind CSS and Glassmorphism for UI.
       4. Auto-patching is active. Your output is rendered LIVE in the editor.`;
 
       const response = await window.puter.ai.chat(
@@ -251,9 +251,8 @@ const App: React.FC = () => {
           fullContent += text;
           setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, content: fullContent } : m));
 
-          // Neural stream analyzer for file synthesis
           const fileRegex = /\[FILE:\s*([a-zA-Z0-9._\-/]+)\]\s*```[a-z]*\n([\s\S]*?)(?:```|$)/g;
-          let match;
+          let match: RegExpExecArray | null;
           while ((match = fileRegex.exec(fullContent)) !== null) {
             const path = match[1].trim();
             const content = match[2].trim();
@@ -265,9 +264,10 @@ const App: React.FC = () => {
       }
       setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, isStreaming: false, status: 'idle' } : m));
       addLog(`Synthesis Successful: ${activeModel.toUpperCase()}`);
-    } catch (err: any) {
-      addLog(`AI_FAULT: ${err.message}`);
-      setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, isStreaming: false, error: err.message } : m));
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      addLog(`AI_FAULT: ${errorMsg}`);
+      setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, isStreaming: false, error: errorMsg } : m));
     } finally {
       setIsGenerating(false);
       setCurrentStatus('idle');
@@ -300,7 +300,6 @@ const App: React.FC = () => {
 
   return (
     <div className="flex h-screen w-full bg-[#05070a] text-slate-200 overflow-hidden font-inter selection:bg-blue-500/30">
-      {/* Activity HUD Bar */}
       <div className="w-16 flex flex-col items-center py-10 bg-[#080b10] border-r border-white/5 gap-12 z-[60]">
         <VayuLogo active={isGenerating} />
         <div className="flex flex-col gap-10">
@@ -323,12 +322,11 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      {/* Control Sidebar */}
       <div className="w-[420px] flex flex-col bg-[#0b0e14] border-r border-white/5 relative z-50 shadow-2xl">
-        <div className="h-20 px-8 border-b border-white/5 flex items-center justify-between bg-black/20 backdrop-blur-3xl">
+        <div className="h-20 px-8 border-b border-white/5 flex items-center justify-between bg-black/20 backdrop-blur-xl">
           <span className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-500 flex items-center gap-3">
             {activeSidebarTab === 'chat' ? <BrainCircuit size={18} className="text-blue-500" /> : <Layers size={18} className="text-indigo-500" />}
-            {activeSidebarTab === 'chat' ? 'Neural Core' : 'Project Hierarchy'}
+            {activeSidebarTab === 'chat' ? 'Neural Core' : 'Hierarchy'}
           </span>
           {activeSidebarTab === 'chat' && (
             <div className="relative" ref={dropdownRef}>
@@ -423,7 +421,6 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Synthesis Workspace */}
       <div className="flex-1 flex flex-col min-w-0 bg-[#05070a]">
         <div className="h-20 px-10 flex items-center justify-between border-b border-white/5 bg-[#0b0e14]/70 backdrop-blur-3xl relative z-40">
           <div className="flex items-center gap-8">
@@ -441,7 +438,7 @@ const App: React.FC = () => {
              <button onClick={() => {
                 const zip = new window.JSZip();
                 files.forEach(f => zip.file(f.path, f.content));
-                zip.generateAsync({type:"blob"}).then(c => {
+                zip.generateAsync({type:"blob"}).then((c: Blob) => {
                    const url = URL.createObjectURL(c);
                    const a = document.createElement('a'); a.href = url; a.download = 'vayu-project-synthesis.zip'; a.click();
                 });
@@ -450,7 +447,6 @@ const App: React.FC = () => {
         </div>
 
         <div className="flex-1 flex overflow-hidden">
-          {/* EDITOR FRAME */}
           <div className="flex-1 border-r border-white/5 relative bg-[#0b0e14]/40">
             <Editor 
               height="100%"
@@ -472,10 +468,9 @@ const App: React.FC = () => {
                 readOnly: isGenerating,
                 scrollbar: { vertical: 'hidden', horizontal: 'hidden' }
               }}
-              onChange={(val) => { if (!isGenerating) setFiles(prev => prev.map(f => f.path === activeFile.path ? { ...f, content: val || '' } : f)); }}
+              onChange={(val: string | undefined) => { if (!isGenerating) setFiles(prev => prev.map(f => f.path === activeFile.path ? { ...f, content: val || '' } : f)); }}
             />
           </div>
-          {/* PREVIEW FRAME */}
           <div className="flex-1 bg-white relative overflow-hidden">
             <Preview 
               code={debouncedBundledCode} 
