@@ -1,8 +1,9 @@
 {
-  "name": "Vayu Code IDE",
-  "description": "A cloud-native browser IDE for design software development with glassmorphism UI, powered by Puter.js and multi-model AI integration.",
+  "name": "AI Studio Build",
+  "description": "A powerful browser-based IDE inspired by Google AI Studio, featuring advanced Gemini integration, real-time preview, and a seamless developer experience.",
   "requestFramePermissions": [
     "camera",
-    "microphone"
+    "microphone",
+    "geolocation"
   ]
 }
