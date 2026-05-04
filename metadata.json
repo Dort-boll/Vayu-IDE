@@ -1,6 +1,6 @@
 {
-  "name": "AI Studio Build",
-  "description": "A powerful browser-based IDE inspired by Google AI Studio, featuring advanced Gemini integration, real-time preview, and a seamless developer experience.",
+  "name": "Vayu IDE",
+  "description": "A next-generation neural workspace for building high-performance applications. Synthesize code, preview instantly, and deploy with the power of reasoning neural cores.",
   "requestFramePermissions": [
     "camera",
     "microphone",

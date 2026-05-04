@@ -10,34 +10,78 @@
   <script src="https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    :root { --accent: #4285f4; --bg: #05070a; }
+    :root { 
+      --accent: #4285f4; 
+      --bg: #05070a; 
+      --glass: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+    }
     body { 
       font-family: 'Inter', sans-serif; 
       margin: 0; 
       padding: 0; 
       overflow: hidden; 
-      color: #e2e8f0; 
+      color: #fafafa; 
       background: var(--bg); 
       -webkit-font-smoothing: antialiased; 
       height: 100%;
+      letter-spacing: -0.011em;
     }
     #root { height: 100%; }
-    .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+    
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.05); border-radius: 10px; transition: all 0.3s ease; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.15); }
+    
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    * { transition: background-color 0.3s ease, border-color 0.3s ease; }
     
     .monaco-editor { padding-top: 10px; }
     
-    ::selection { background: rgba(66, 133, 244, 0.3); color: #fff; }
+    ::selection { background: rgba(66, 133, 244, 0.4); color: #fff; }
 
-    /* Markdown Styles */
-    .markdown-body { color: #e2e8f0; line-height: 1.6; }
-    .markdown-body code { font-family: 'JetBrains Mono', monospace; }
-    .markdown-body pre { background: transparent !important; padding: 0 !important; margin: 0 !important; }
-    .markdown-body p { margin-bottom: 1rem; }
-    .markdown-body ul, .markdown-body ol { margin-bottom: 1rem; padding-left: 1.5rem; }
-    .markdown-body li { margin-bottom: 0.25rem; }
+    /* Neural Glow Utilities */
+    .glow-blue { box-shadow: 0 0 30px rgba(59, 130, 246, 0.15); }
+    .glow-purple { box-shadow: 0 0 30px rgba(168, 85, 247, 0.15); }
+
+    /* Glassmorphism Overrides */
+    .glass-dark {
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+    }
+
+    /* Markdown Styles - Refined */
+    .markdown-body { 
+      color: #d1d5db; 
+      line-height: 1.7; 
+      font-size: 14px;
+    }
+    .markdown-body code { 
+      font-family: 'JetBrains Mono', monospace; 
+      background: rgba(255,255,255,0.05);
+      padding: 0.2em 0.4em;
+      border-radius: 6px;
+      font-size: 0.9em;
+    }
+    .markdown-body pre { 
+      background: rgba(0,0,0,0.3) !important; 
+      padding: 1.5rem !important; 
+      border-radius: 1rem !important;
+      border: 1px solid rgba(255,255,255,0.05) !important;
+      margin: 1.5rem 0 !important;
+    }
+    .markdown-body p { margin-bottom: 1.25rem; }
+    .markdown-body h1, .markdown-body h2, .markdown-body h3 {
+      color: #fff;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+    }
   </style>
 </head>
 <body class="h-full overflow-hidden">
