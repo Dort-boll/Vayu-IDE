@@ -451,7 +451,7 @@ const App: React.FC = () => {
 
   const handleClearChat = () => setMessages([]);
 
-  if (showLanding) return <LandingPage onStart={handleStart} user={user} onLogin={handleLogin} />;
+  if (showLanding) return <LandingPage onStart={handleStart} user={user} onLogin={handleLogin} isMobile={isMobile} />;
   if (showIntro) return <IntroScreen />;
 
   return (
