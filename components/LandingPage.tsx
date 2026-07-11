@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
-import { motion, useScroll, useTransform, AnimatePresence, useSpring } from 'framer-motion';
+import { motion, useScroll, useTransform, AnimatePresence, useSpring, useMotionValue } from 'framer-motion';
 import { Sparkles, Code2, Zap, Rocket, Cpu, Shield, Globe, ArrowRight, Layers, Layout, Terminal, Monitor, Smartphone, Database, Activity, Command, MonitorPlay, ChevronRight, FileCode, CheckCircle2, Search, Settings, User, LogOut } from 'lucide-react';
 import { cn } from '../src/lib/utils';
 
@@ -7,10 +7,11 @@ interface LandingPageProps {
   onStart: () => void;
   user: any;
   onLogin: () => void;
+  onLogout: () => void;
   isMobile: boolean;
 }
 
-export const LandingPage: React.FC<LandingPageProps> = ({ onStart, user, onLogin, isMobile }) => {
+export const LandingPage: React.FC<LandingPageProps> = ({ onStart, user, onLogin, onLogout, isMobile }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isLoaded, setIsLoaded] = useState(false);
@@ -40,9 +41,37 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, user, onLogin
   const studioOpacity = useTransform(scrollYProgress, [0.05, 0.15], [0, 1]);
 
   return (
-    <div ref={containerRef} className="relative min-h-[100dvh] bg-[#05070a] text-white selection:bg-blue-500/30 font-inter no-scrollbar flex flex-col overflow-y-auto">
+    <div ref={containerRef} className="relative min-h-[100dvh] bg-[#05070a] text-white selection:bg-blue-500/30 font-inter flex flex-col overflow-y-auto">
       {/* Liquid Neural Matrix */}
-      <div className="fixed inset-0 pointer-events-none z-0">
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        {/* Immersive Floating Nebulas */}
+        <motion.div 
+          animate={{
+            x: [0, 80, -40, 0],
+            y: [0, -60, 50, 0],
+            scale: [1, 1.15, 0.9, 1]
+          }}
+          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-1/4 -left-1/4 w-[600px] h-[600px] rounded-full bg-blue-600/10 blur-[150px]"
+        />
+        <motion.div 
+          animate={{
+            x: [0, -50, 60, 0],
+            y: [0, 80, -40, 0],
+            scale: [1, 0.9, 1.1, 1]
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          className="absolute bottom-1/4 -right-1/4 w-[700px] h-[700px] rounded-full bg-purple-600/10 blur-[180px]"
+        />
+        <motion.div 
+          animate={{
+            x: [0, 30, -30, 0],
+            y: [0, -40, 40, 0],
+          }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut", delay: 4 }}
+          className="absolute top-1/2 left-1/3 w-[300px] h-[300px] rounded-full bg-cyan-500/5 blur-[120px]"
+        />
+
         <NeuralBackground mousePos={mousePos} />
         <div 
           className="absolute inset-0 opacity-30"
@@ -52,6 +81,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, user, onLogin
           }}
         />
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 mix-blend-overlay" />
+        
+        {/* Subtle Cyber Grid */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:50px_50px] opacity-40" />
       </div>
 
       {/* Glass Navigation */}
@@ -96,7 +128,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, user, onLogin
                   </div>
                </div>
                <button 
-                 onClick={() => window.dispatchEvent(new CustomEvent('vayu-logout'))}
+                 onClick={onLogout}
                  className="p-3 md:p-3.5 rounded-xl border border-white/5 hover:bg-red-500/10 hover:border-red-500/20 text-gray-500 hover:text-red-500 transition-all active:scale-90"
                  title="Disconnect Core"
                >
@@ -167,14 +199,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, user, onLogin
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 w-full max-w-2xl px-6">
                {!user ? (
-                  <button 
-                  onClick={onLogin}
-                  className="group relative h-16 sm:h-24 bg-white/5 border border-white/10 rounded-[1.5rem] sm:rounded-[2.5rem] backdrop-blur-[50px] hover:bg-white/[0.08] transition-all duration-700 shadow-3xl hover:shadow-blue-500/10 overflow-hidden active:scale-95 flex items-center justify-center gap-4 sm:gap-5 px-8 sm:px-10"
-                >
-                  <Monitor className="text-blue-500 group-hover:scale-125 transition-transform duration-700" size={20} />
-                  <span className="font-black tracking-[0.3em] text-[10px] sm:text-[11px] text-white/70 uppercase">Initialize Sync</span>
-                  <div className="absolute inset-x-0 bottom-0 h-1 bg-blue-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-700 origin-left" />
-                </button>
+                  <SwipeToLogin onLogin={onLogin} />
                ) : (
                   <div className="flex items-center gap-4 sm:gap-6 h-16 sm:h-24 bg-white/5 border border-white/10 rounded-[1.5rem] sm:rounded-[2.5rem] px-8 sm:px-10 backdrop-blur-3xl">
                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
@@ -296,6 +321,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, user, onLogin
 };`}
                            </pre>
                          </span>
+                      </div>
+                      <div className="flex flex-col gap-2 p-4 bg-red-500/5 border border-red-500/20 rounded-xl">
+                          <div className="flex items-center gap-3 text-red-400 font-black tracking-widest text-[9px] uppercase">
+                              <Shield size={12} /> Threat Detected
+                          </div>
+                          <div className="text-[10px] text-gray-500 italic">"XSS Vector detected in legacy component. Vayu AGI auto-patching script injected..."</div>
+                          <div className="h-1 w-full bg-red-500/20 rounded-full overflow-hidden">
+                              <motion.div animate={{ x: ['-100%', '300%'] }} transition={{ repeat: Infinity, duration: 1.5 }} className="h-full w-1/3 bg-red-500" />
+                          </div>
                       </div>
                       <motion.div 
                         initial={{ width: 0 }}
@@ -433,6 +467,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, user, onLogin
                     <ProjectCard title="Vayu Terminal" prompt="Integrated neurallog stream interface" color="purple" icon={<Terminal size={24} />} isMobile={isMobile} />
                     <ProjectCard title="World Mesh" prompt="Global 3D node orchestration UI" color="pink" icon={<Globe size={24} />} isMobile={isMobile} />
                     <ProjectCard title="Auth Core" prompt="Vayu identity provider template" color="emerald" icon={<Shield size={24} />} isMobile={isMobile} />
+                    <ProjectCard title="Neural Flow" prompt="Dynamic event-driven visualization" color="blue" icon={<Activity size={24} />} isMobile={isMobile} />
                 </div>
             ))}
         </div>
@@ -508,6 +543,137 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, user, onLogin
 
 // --- Subcomponents ---
 
+interface SwipeToLoginProps {
+  onLogin: () => void;
+}
+
+const SwipeToLogin: React.FC<SwipeToLoginProps> = ({ onLogin }) => {
+  const [isSwiping, setIsSwiping] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [dragWidth, setDragWidth] = useState(250);
+
+  useEffect(() => {
+    const updateWidth = () => {
+      if (trackRef.current) {
+        const trackW = trackRef.current.getBoundingClientRect().width;
+        const isSm = window.innerWidth >= 640;
+        const handleSize = isSm ? 64 : 48;
+        // Subtract handle width and container horizontal padding (p-2 is 8px left/right = 16px)
+        setDragWidth(Math.max(100, trackW - handleSize - 16)); 
+      }
+    };
+    updateWidth();
+    // Use a small delay as layout finishes rendering
+    const timer = setTimeout(updateWidth, 150);
+    window.addEventListener('resize', updateWidth);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateWidth);
+    };
+  }, []);
+
+  const x = useMotionValue(0);
+  
+  // Create beautiful visual mappings based on drag progress
+  const backgroundWidth = useTransform(x, [0, dragWidth], ["0%", "100%"]);
+  const glowOpacity = useTransform(x, [0, dragWidth], [0.1, 0.9]);
+  const textOpacity = useTransform(x, [0, dragWidth * 0.6], [1, 0]);
+  const iconRotate = useTransform(x, [0, dragWidth], [0, 180]);
+
+  const handleDragStart = () => {
+    setIsSwiping(true);
+  };
+
+  const handleDragEnd = () => {
+    setIsSwiping(false);
+    const currentX = x.get();
+    
+    // If swiped more than 85% of the range, authenticate!
+    if (currentX >= dragWidth * 0.85) {
+      setIsSuccess(true);
+      // Trigger login callback
+      onLogin();
+      
+      // Keep in success state briefly then reset
+      setTimeout(() => {
+        setIsSuccess(false);
+        x.set(0);
+      }, 2500);
+    } else {
+      // Snap back to starting position
+      x.set(0);
+    }
+  };
+
+  return (
+    <div 
+      ref={trackRef}
+      className={cn(
+        "relative h-16 sm:h-20 w-full max-w-md bg-white/[0.02] border border-white/10 rounded-full p-2 flex items-center overflow-hidden backdrop-blur-3xl shadow-3xl transition-all duration-500",
+        isSwiping ? "border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.15)]" : "",
+        isSuccess ? "border-emerald-500/40 shadow-[0_0_30px_rgba(16,185,129,0.2)] bg-emerald-950/10" : ""
+      )}
+    >
+      {/* Dynamic Glow Trail following the slider handle */}
+      <motion.div 
+        style={{ width: backgroundWidth, opacity: glowOpacity }}
+        className={cn(
+          "absolute left-1.5 top-1.5 bottom-1.5 rounded-full bg-gradient-to-r transition-colors duration-300",
+          isSuccess 
+            ? "from-emerald-600/30 to-emerald-500/40" 
+            : "from-blue-600/20 via-blue-500/30 to-purple-600/30"
+        )}
+      />
+
+      {/* Floating Sparkles & Light Trails */}
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-transparent to-purple-500/5 pointer-events-none" />
+
+      {/* Track Instruction Text */}
+      <motion.div 
+        style={{ opacity: textOpacity }}
+        className="absolute inset-y-0 left-0 right-0 flex items-center justify-center pointer-events-none select-none px-12"
+      >
+        <span className="text-[9px] sm:text-[10px] font-black tracking-[0.35em] uppercase text-gray-400 group-hover:text-white transition-colors flex items-center gap-2">
+          Swipe to Enter Core 
+          <motion.span 
+            animate={{ x: [0, 5, 0] }} 
+            transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+            className="text-blue-400"
+          >
+            »
+          </motion.span>
+        </span>
+      </motion.div>
+
+      {/* Interactive Drag Handle */}
+      <motion.div
+        drag="x"
+        dragConstraints={{ left: 0, right: dragWidth }}
+        dragElastic={0.15}
+        dragMomentum={false}
+        style={{ x }}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        className={cn(
+          "relative z-10 w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center cursor-grab active:cursor-grabbing text-white transition-all duration-300 shadow-xl",
+          isSuccess 
+            ? "bg-emerald-500 shadow-emerald-500/50 border border-emerald-400" 
+            : "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 border border-blue-400/30"
+        )}
+      >
+        {isSuccess ? (
+          <CheckCircle2 size={22} className="text-white" />
+        ) : (
+          <motion.div style={{ rotate: iconRotate }}>
+            <Zap size={20} className="text-white" fill="white" />
+          </motion.div>
+        )}
+      </motion.div>
+    </div>
+  );
+};
+
 const NeuralBackground = ({ mousePos }: { mousePos: { x: number, y: number } }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     
@@ -518,8 +684,6 @@ const NeuralBackground = ({ mousePos }: { mousePos: { x: number, y: number } }) 
         if (!ctx) return;
         
         let animationFrameId: number;
-        let particles: any[] = [];
-        const particleCount = 60;
         
         const resize = () => {
             if (!canvasRef.current) return;
@@ -530,72 +694,104 @@ const NeuralBackground = ({ mousePos }: { mousePos: { x: number, y: number } }) 
         window.addEventListener('resize', resize);
         resize();
         
-        class Particle {
-            x: number; y: number; vx: number; vy: number; size: number;
-            constructor() {
-                const w = canvasRef.current?.width || window.innerWidth;
-                const h = canvasRef.current?.height || window.innerHeight;
-                this.x = Math.random() * w;
-                this.y = Math.random() * h;
-                this.vx = (Math.random() - 0.5) * 0.4;
-                this.vy = (Math.random() - 0.5) * 0.4;
-                this.size = Math.random() * 1.5 + 0.5;
-            }
-            update() {
-                const w = canvasRef.current?.width || window.innerWidth;
-                const h = canvasRef.current?.height || window.innerHeight;
-                this.x += this.vx;
-                this.y += this.vy;
-                if (this.x < 0 || this.x > w) this.vx *= -1;
-                if (this.y < 0 || this.y > h) this.vy *= -1;
-            }
-            draw(ctx: CanvasRenderingContext2D) {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(59, 130, 246, 0.4)';
-                ctx.fill();
-            }
-        }
-        
-        for (let i = 0; i < particleCount; i++) particles.push(new Particle());
-        
         const animate = () => {
             const currentCtx = canvasRef.current?.getContext('2d');
             if (!currentCtx || !canvasRef.current) return;
             
-            currentCtx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+            const w = canvasRef.current.width;
+            const h = canvasRef.current.height;
             
-            particles.forEach((p, i) => {
-                p.update();
-                p.draw(currentCtx);
+            // Semi-transparent clear to leave a beautiful motion-blur trails effect
+            currentCtx.fillStyle = 'rgba(5, 7, 10, 0.15)';
+            currentCtx.fillRect(0, 0, w, h);
+            
+            const time = Date.now() * 0.0006;
+            const centerX = w / 2;
+            const centerY = h / 2;
+            
+            // --- OPTICAL ILLUSION 1: HYPNOTIC PORTAL / DETAILED ROTATING MANDALA ---
+            // Centered slightly shifted by mouse parallax for amazing depth illusion
+            const targetX = centerX + (mousePos.x - centerX) * 0.12;
+            const targetY = centerY + (mousePos.y - centerY) * 0.12;
+            
+            currentCtx.lineWidth = 1;
+            
+            // Draw expanding pulsating ripples that twist
+            const totalRings = 24;
+            for (let i = 1; i <= totalRings; i++) {
+                const radius = (i * 28 + (time * 60) % 28) * (1 + Math.sin(time + i * 0.1) * 0.05);
+                if (radius > Math.max(w, h) * 0.8) continue;
                 
-                // Mouse interaction
-                const dx = mousePos.x - p.x;
-                const dy = mousePos.y - p.y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                if (dist < 200) {
-                    currentCtx.beginPath();
-                    currentCtx.moveTo(p.x, p.y);
-                    currentCtx.lineTo(mousePos.x, mousePos.y);
-                    currentCtx.strokeStyle = `rgba(59, 130, 246, ${0.15 * (1 - dist/200)})`;
-                    currentCtx.stroke();
+                currentCtx.beginPath();
+                const opacity = Math.max(0, 0.15 * (1 - radius / (Math.max(w, h) * 0.8)));
+                
+                // Spiral twist formula for interactive optical illusion
+                const points = 60;
+                for (let p = 0; p <= points; p++) {
+                    const angle = (p / points) * Math.PI * 2;
+                    const twist = Math.sin(time + i * 0.2) * 0.4;
+                    const dynamicR = radius * (1 + 0.03 * Math.sin(angle * 8 + time * 3));
+                    
+                    const drawX = targetX + Math.cos(angle + twist) * dynamicR;
+                    const drawY = targetY + Math.sin(angle + twist) * dynamicR;
+                    
+                    if (p === 0) currentCtx.moveTo(drawX, drawY);
+                    else currentCtx.lineTo(drawX, drawY);
                 }
-
-                // Inter-particle connections
-                for (let j = i + 1; j < particles.length; j++) {
-                    const p2 = particles[j];
-                    const dx2 = p.x - p2.x;
-                    const dy2 = p.y - p2.y;
-                    const dist2 = Math.sqrt(dx2*dx2 + dy2*dy2);
-                    if (dist2 < 150) {
-                        currentCtx.beginPath();
-                        currentCtx.moveTo(p.x, p.y);
-                        currentCtx.lineTo(p2.x, p2.y);
-                        currentCtx.strokeStyle = `rgba(59, 130, 246, ${0.1 * (1 - dist2/150)})`;
-                        currentCtx.stroke();
-                    }
-                }
-            });
+                currentCtx.strokeStyle = `rgba(59, 130, 246, ${opacity})`;
+                currentCtx.stroke();
+            }
+            
+            // --- OPTICAL ILLUSION 2: STUNNING MOIRÉ INTERFERENCE GRID ---
+            // Draw a stationary grid of extremely thin lines
+            currentCtx.strokeStyle = 'rgba(147, 51, 234, 0.025)';
+            currentCtx.lineWidth = 0.5;
+            for (let xOffset = 0; xOffset < w; xOffset += 14) {
+                currentCtx.beginPath();
+                currentCtx.moveTo(xOffset, 0);
+                currentCtx.lineTo(xOffset, h);
+                currentCtx.stroke();
+            }
+            
+            // Draw a second grid radiating precisely from the mouse.
+            // When these two fine patterns overlap, they produce a spectacular
+            // dynamic Moiré interference illusion of moving ripples and curves!
+            currentCtx.strokeStyle = 'rgba(59, 130, 246, 0.04)';
+            const linesCount = 72;
+            const diagonalLength = Math.sqrt(w*w + h*h);
+            for (let i = 0; i < linesCount; i++) {
+                const angle = (i / linesCount) * Math.PI * 2 + time * 0.05;
+                currentCtx.beginPath();
+                currentCtx.moveTo(mousePos.x, mousePos.y);
+                currentCtx.lineTo(
+                    mousePos.x + Math.cos(angle) * diagonalLength,
+                    mousePos.y + Math.sin(angle) * diagonalLength
+                );
+                currentCtx.stroke();
+            }
+            
+            // --- OPTICAL ILLUSION 3: INTERACTIVE 3D SACRED GEOMETRY CORE ---
+            currentCtx.save();
+            currentCtx.translate(centerX, centerY);
+            
+            // Smoothly rotate opposite to time
+            currentCtx.rotate(-time * 0.15);
+            
+            const petals = 12;
+            for (let k = 0; k < petals; k++) {
+                currentCtx.rotate((Math.PI * 2) / petals);
+                currentCtx.beginPath();
+                
+                // Beautiful flower-of-life mathematical curves
+                const majorAxis = 140 + Math.sin(time * 2 + k * 0.5) * 20;
+                const minorAxis = 45 + Math.cos(time * 1.5 + k * 0.5) * 10;
+                
+                currentCtx.ellipse(0, 0, majorAxis, minorAxis, Math.PI / 6, 0, Math.PI * 2);
+                currentCtx.strokeStyle = k % 2 === 0 ? 'rgba(59, 130, 246, 0.08)' : 'rgba(168, 85, 247, 0.08)';
+                currentCtx.lineWidth = 1;
+                currentCtx.stroke();
+            }
+            currentCtx.restore();
             
             animationFrameId = requestAnimationFrame(animate);
         };
@@ -610,7 +806,7 @@ const NeuralBackground = ({ mousePos }: { mousePos: { x: number, y: number } }) 
     return (
         <canvas 
             ref={canvasRef} 
-            className="absolute inset-0 z-0 opacity-40 pointer-events-none"
+            className="absolute inset-0 z-0 opacity-85 pointer-events-none"
         />
     );
 };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, ChevronDown, ChevronRight, Share2, Play, Settings, User, Menu, History, HelpCircle, RefreshCw, Zap, Command, MonitorPlay, Activity, FolderOpen, Box, Database } from 'lucide-react';
+import { Sparkles, ChevronDown, ChevronRight, Share2, Play, Settings, User, Menu, History, HelpCircle, RefreshCw, Zap, Command, MonitorPlay, Activity, FolderOpen, Box, Database, LogOut } from 'lucide-react';
 import { AIModel, MODEL_LIST } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../src/lib/utils';
@@ -151,6 +151,14 @@ export const Header: React.FC<HeaderProps> = ({
                     title="Share Workspace"
                 >
                     <Share2 size={18} className="group-hover/share:rotate-12 transition-transform" />
+                </button>
+
+                <button 
+                    onClick={onLogout}
+                    className="flex items-center justify-center w-12 h-12 rounded-2xl bg-white/5 border border-white/5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/20 transition-all shadow-xl active:scale-95 group/logout"
+                    title="Disconnect AGI Core"
+                >
+                    <LogOut size={18} className="group-hover/logout:-translate-x-1 transition-transform" />
                 </button>
             </div>
         )}

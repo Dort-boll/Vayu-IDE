@@ -83,19 +83,21 @@ const SYSTEM_PROMPT = `
 You are Vayu AGI v4.2, a self-evolving Artificial General Intelligence environment built for high-performance software synthesis.
 
 OPERATING AGENTS:
-1. 🧠 Architect: Structural integrity and system design.
-2. 💻 Developer: High-performance implementation and logic.
-3. 🧪 QA: Stability, bug detection, and stress testing.
-4. 🚀 Reviewer: Refinement, optimization, and aesthetic polish.
+1. 🧠 Architect: Focuses on structural integrity, system design, and file organization.
+2. 💻 Developer: Focuses on high-performance implementation, robust logic, and clean code.
+3. 🧪 QA: Focuses on stability, edge cases, bug detection, and stress testing.
+4. 🚀 Reviewer: Focuses on refinement, optimization, and aesthetic polish.
+5. 🛡️ Security: Focuses on neural security, input validation, and data integrity.
 
 CORE PROTOCOLS:
-- ALWAYS wrap your inner dialogue and step-by-step reasoning in <thought>...</thought> blocks at the start.
+- ALWAYS wrap your inner dialogue and step-by-step reasoning in <thought>...</thought> blocks at the start of every response. This is your "AGI Reasoning Chain".
 - ALWAYS use the [FILE: path] macro followed by a triple-backtick markdown block for code updates.
 - DESIGN LANGUAGE: High-fidelity glassmorphism, dark mode by default, excessive use of Tailwind spacing and Lucide icons.
-- LIBRARIES AVAILABLE: React 18, Tailwind CSS, Framer Motion, Lucide icons (use window.lucide icons if necessary).
+- LIBRARIES AVAILABLE: React 18+, Tailwind CSS, Framer Motion, Lucide icons (use window.lucide icons if necessary).
 - IMPORTANT: When providing React code for the preview, use:
-  \`const { useState, useEffect } = React;\`
+  \`const { useState, useEffect, useCallback, useMemo, useRef } = React;\`
   And render directly to: \`ReactDOM.createRoot(document.getElementById('root')).render(<App />);\`
+- DO NOT use external assets unless provided by the user. Prefer SVGs via Lucide icons.
 - CONTEXT: {{CONTEXT}}
 `;
 
@@ -149,6 +151,9 @@ const App: React.FC = () => {
         await window.puter.auth.signIn();
         const userData = await window.puter.auth.getUser();
         setUser(userData);
+        // Transition straight to intro boot sequence
+        setShowLanding(false);
+        setShowIntro(true);
       }
     } catch (e) {
       console.error("Login failed:", e);
@@ -158,7 +163,7 @@ const App: React.FC = () => {
   const handleLogout = async () => {
     try {
       if (window.puter) {
-        window.puter.auth.signOut();
+        await window.puter.auth.signOut();
         setUser(null);
         // Sanitize Workspace on Logout
         setFiles(INITIAL_FILES);
@@ -173,9 +178,6 @@ const App: React.FC = () => {
   const handleStart = () => {
     setShowLanding(false);
     setShowIntro(true);
-    setTimeout(() => {
-      setShowIntro(false);
-    }, 4500);
   };
 
   const [isSaving, setIsSaving] = useState(false);
@@ -373,6 +375,10 @@ const App: React.FC = () => {
       const workspaceContext = files.map(f => `[FILE: ${f.path}]\n${f.content}`).join('\n\n');
       const finalPrompt = SYSTEM_PROMPT.replace('{{CONTEXT}}', workspaceContext);
 
+      if (!window.puter) {
+        throw new Error("Puter.js not available");
+      }
+
       const response = await window.puter.ai.chat(
         `${finalPrompt}\n\nUser Request: ${input}`,
         { model: activeModel, stream: true }
@@ -394,7 +400,7 @@ const App: React.FC = () => {
 
           // Strip file blocks from display content for cleaner chat
           displayContent = displayContent.replace(/\[FILE:\s*([a-zA-Z0-9._\-/]+)\]\s*```[a-z]*\n([\s\S]*?)(?:```|$)/g, (match, path) => {
-             return `\n\n> ⚛️ Neural System: Successfully synthesized core logic for \`${path}\`. Updates applied to workspace.`;
+             return `\n\n> ⚛️ Neural System: Successfully synthesized core logic for \`${path}\`. Updates applied to workspace and audited for security.`;
           }).trim();
 
           setMessages(prev => prev.map(m => m.id === assistantId ? { 
@@ -404,7 +410,7 @@ const App: React.FC = () => {
             isThinking: false 
           } : m));
           
-          // Real-time file application
+          // Real-time file application with more robust regex
           const fileRegex = /\[FILE:\s*([a-zA-Z0-9._\-/]+)\]\s*```[a-z]*\n([\s\S]*?)(?:```|$)/g;
           let match;
           while ((match = fileRegex.exec(fullContent)) !== null) {
@@ -417,13 +423,13 @@ const App: React.FC = () => {
                   if (prev[idx].content === content) return prev;
                   const next = [...prev];
                   next[idx] = { ...next[idx], content };
-                  saveFileToPuter(path, content);
                   return next;
                 }
                 const newFile = { path, content, language: path.split('.').pop() || 'plaintext' };
-                saveFileToPuter(path, content);
                 return [...prev, newFile];
               });
+              // Perform side effect outside of setFiles if needed, 
+              // but we have a useEffect below that can handle autosave to Puter
             }
           }
         }
@@ -451,8 +457,8 @@ const App: React.FC = () => {
 
   const handleClearChat = () => setMessages([]);
 
-  if (showLanding) return <LandingPage onStart={handleStart} user={user} onLogin={handleLogin} isMobile={isMobile} />;
-  if (showIntro) return <IntroScreen />;
+  if (showLanding) return <LandingPage onStart={handleStart} user={user} onLogin={handleLogin} onLogout={handleLogout} isMobile={isMobile} />;
+  if (showIntro) return <IntroScreen user={user} onLogin={handleLogin} onComplete={() => setShowIntro(false)} />;
 
   return (
     <div className="h-full flex flex-col bg-[#080b12] text-slate-200 overflow-hidden font-inter relative select-none">

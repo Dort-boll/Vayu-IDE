@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, User, Sparkles, Loader2, AlertCircle, Trash2, Zap, Cpu, Activity, Layout, Code, ShieldCheck, Search, Copy, Share2, Info, Settings, LogOut, Check } from 'lucide-react';
+import { Send, User, Sparkles, Loader2, AlertCircle, Trash2, Zap, Cpu, Activity, Layout, Code, ShieldCheck, Search, Copy, Share2, Info, Settings, LogOut, Check, CheckCircle2 } from 'lucide-react';
 import { ChatMessage, AIAgent } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../src/lib/utils';
@@ -19,7 +19,7 @@ const AGENTS: { id: AIAgent; icon: any; color: string; desc: string }[] = [
   { id: 'Architect', icon: Layout, color: 'text-purple-400', desc: 'System Design & Structure' },
   { id: 'Developer', icon: Code, color: 'text-blue-400', desc: 'Code Performance & Implementation' },
   { id: 'Security', icon: ShieldCheck, color: 'text-red-400', desc: 'Neural Security & Integrity' },
-  { id: 'QA', icon: ShieldCheck, color: 'text-emerald-400', desc: 'Stability & Bug Prevention' },
+  { id: 'QA', icon: CheckCircle2, color: 'text-emerald-400', desc: 'Stability & Bug Prevention' },
   { id: 'Reviewer', icon: Search, color: 'text-amber-400', desc: 'Optimization & Best Practices' },
 ];
 
